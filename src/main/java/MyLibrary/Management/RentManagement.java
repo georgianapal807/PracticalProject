@@ -4,6 +4,7 @@ import MyLibrary.Book;
 import MyLibrary.Rent;
 import MyLibrary.User;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -26,7 +27,6 @@ public class RentManagement implements ManagementCrud<Rent> {
         System.out.println("Rent issued");
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
-            System.out.println(item.getUser().getId());
             session.persist(item);
             transaction.commit();
         }
@@ -69,7 +69,13 @@ public class RentManagement implements ManagementCrud<Rent> {
             session.beginTransaction();
             Rent r = getById(id);
             System.out.println("Id: " + r.getId() + "\nUser: " + r.getUser().getFirstName() + " " + r.getUser().getLastName());
+            List<Book> bookList = r.getBooks();
+            for (Book b : bookList) {
+                System.out.println("Title: " + b.getTitle() + " written by " + b.getAuthor().getFirstName() + " " + b.getAuthor().getLastName());
+            }
             System.out.println("StartDate: " + r.getStartDate() + "\nEndDate: " + r.getEndDate());
+
+
         }
     }
 

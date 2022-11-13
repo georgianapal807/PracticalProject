@@ -84,4 +84,15 @@ public class UserManagement implements ManagementCrud<User> {
             return typedQuery.getResultList();
         }
     }
+
+    public boolean checkUser(int item){
+        boolean ok = false;
+        List<User> userList = getUsers();
+        for (User u : userList) {
+            if (item == u.getId()) {
+               ok = true;
+            }
+        }
+        return ok;
+    }
 }

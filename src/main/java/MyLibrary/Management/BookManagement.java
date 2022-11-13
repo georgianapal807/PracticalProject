@@ -3,6 +3,7 @@ package MyLibrary.Management;
 import MyLibrary.Author;
 import MyLibrary.Book;
 import MyLibrary.Rent;
+import MyLibrary.User;
 import jakarta.persistence.TypedQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -83,5 +84,15 @@ public class BookManagement implements ManagementCrud<Book> {
             //Execute query -> get ResultSet(JDBC analogy) -> transform resultSet into List<Book>
             return typedQuery.getResultList();
         }
+    }
+    public boolean checkBook(int item){
+        boolean ok = false;
+        List<Book> bookList = getAllBooks();
+        for (Book u : bookList) {
+            if (item == u.getId()) {
+                ok = true;
+            }
+        }
+        return ok;
     }
 }

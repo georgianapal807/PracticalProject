@@ -21,7 +21,7 @@ public class Book {
     private int total;
 
 
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "books")
+    @ManyToMany(cascade = CascadeType.MERGE, mappedBy = "books")
     private List<Rent> rents;
 
     @ManyToOne
