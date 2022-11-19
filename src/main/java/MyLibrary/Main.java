@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -23,7 +24,6 @@ public class Main {
         BookManagement bookManagement = new BookManagement(sessionFactory);
         UserManagement userManagement = new UserManagement(sessionFactory);
         RentManagement rentManagement = new RentManagement(sessionFactory);
-
         Scanner scanner = new Scanner(System.in);
         System.out.println("Select your option:\n" + //Here is the main menu for RentManagement section
                 "1.New rent\n" +
@@ -48,9 +48,10 @@ public class Main {
                     ok = true;
                 }
             }
-            if (ok == true) {
+            if (ok == true) { //Fully booked
                 System.out.println("You already rented books, please return them and you can rent again!"); //If he already rented show a msg
-            } else { //If we are here it means the user_id given has no rented books and we will add a new one
+            }
+            if (ok == false) { //If we are here it means the user_id given has no rented books. we will add a new one
                 Rent rent = new Rent();
                 rent.setUser(userManagement.getById(newUserRent));
                 rent.setStartDate(LocalDate.now());
@@ -63,10 +64,17 @@ public class Main {
                         System.out.println("Wrong book ID!");
                     }
                 }
-                //TO DO!!!!! we must put a function that checks if are enough books to borrow, if not exit
-                rent.setBooks(List.of(bookManagement.getById(newBookID))); //Issue a new rent
-                rentManagement.insert(rent);
+                if (bookManagement.getById(newBookID).getTotal() > 0) {
+                    rent.setBooks(List.of(bookManagement.getById(newBookID))); //Issue a new rent
+                    Book book = bookManagement.getById(newBookID);
+                    book.setTotal(bookManagement.getById(newBookID).getTotal() - 1);
+                    bookManagement.update(book);
+                    rentManagement.insert(rent);
+                } else {
+                    System.out.println("Sorry the book is unavailable right now!");
+                }
             }
+
         }
 //------------------------Update RENT-----------------------------------------------------------
         if (chosen.equals("2")) {
@@ -85,26 +93,41 @@ public class Main {
                     ok = true;
                 }
             }
-
-            // If ok = true, the user has already rented some books, but he wants to add more books at his rent_id
-            int rentId = 0; //will keep the rentId of the user_id given
-            for (Rent r : rentList) {
-                if (updateUser == r.getUser().getId()) {
-                    rentId = r.getId();
+            if (ok == false) {
+                System.out.println("You don't have any rented books, please go to insert menu!");
+            }
+            if (ok == true) {
+                // If ok = true, the user has already rented some books, but he wants to add more books at his rent_id
+                int rentId = 0; //will keep the rentId of the user_id given
+                for (Rent r : rentList) {
+                    if (updateUser == r.getUser().getId()) {
+                        rentId = r.getId();
+                    }
+                }
+                Rent updatedRent = rentManagement.getById(rentId);
+                int newBookID = 0; //Here we start to check if the id given is in our database
+                while (bookManagement.checkBook(newBookID) == false) {
+                    System.out.println("Please insert the id_book you want to borrow");
+                    newBookID = scanner.nextInt();
+                    if (bookManagement.checkBook(newBookID) == false) {
+                        System.out.println("Wrong book ID!");
+                    }
+                }
+                boolean checking = false;
+                List<Book> usersBookList = new ArrayList<>();
+                usersBookList = updatedRent.getBooks();
+                for (Book b : usersBookList) {
+                    if (b.getId() == newBookID) {
+                        checking = true;
+                    }
+                }
+                if (checking == true) {
+                    System.out.println("You already rented this book!");
+                } else {
+                    updatedRent.getBooks().add(bookManagement.getById(newBookID));
+                    rentManagement.update(updatedRent);
                 }
             }
-            Rent updatedRent = rentManagement.getById(rentId);
-            int newBookID = 0; //Here we start to check if the id given is in our database
-            while (bookManagement.checkBook(newBookID) == false) {
-                System.out.println("Please insert the id_book you want to borrow");
-                newBookID = scanner.nextInt();
-                if (bookManagement.checkBook(newBookID) == false) {
-                    System.out.println("Wrong book ID!");
-                }
-            }
-//            System.out.println("Incercam sa adaugam cartea la lista lui");
-            updatedRent.getBooks().add(bookManagement.getById(newBookID));
-            rentManagement.update(updatedRent);
         }
 // -------------------------Delete RENT-----------------------------------------------------------
         if (chosen.equals("3")) {
@@ -158,3 +181,4 @@ public class Main {
         }
     }
 }
+

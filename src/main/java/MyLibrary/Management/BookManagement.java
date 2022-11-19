@@ -71,6 +71,7 @@ public class BookManagement implements ManagementCrud<Book> {
             System.out.println("Author: " + a.getFirstName() + " " + a.getLastName());
         }
     }
+
     public List<Book> getAllBooks() {
         try (Session session = sessionFactory.openSession()) {
             JpaCriteriaQuery<Book> jpaCriteriaQuery = session.getCriteriaBuilder()
@@ -85,7 +86,8 @@ public class BookManagement implements ManagementCrud<Book> {
             return typedQuery.getResultList();
         }
     }
-    public boolean checkBook(int item){
+
+    public boolean checkBook(int item) {
         boolean ok = false;
         List<Book> bookList = getAllBooks();
         for (Book u : bookList) {
